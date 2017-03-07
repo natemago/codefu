@@ -6,15 +6,76 @@ def binom(r, n):
   return int(fac(n))//int((fac(r))*int(fac(n-r)))
 
 
-def sumz(arr, N):
+
+
+def binom_mod(r, n, mod):
+  """
+    n        n!         n!       1                        1
+  |   | = ---------- = ---- * -------- = P[r+1, n] * -----------
+    r      r!(n-r)!     r!     (n-r)!                 P[1, n-r]
+  
+  n!     = P[1, n]
+  r!     = P[1, r]
+  (n-r)! = P[1, n-r]
+
+  n - r < mod - so this is bound to [0, mod]
+  r - unbound, may be very close to n
+  n - unbound
+  """
+  
+  if r == 0:
+    return 1
+  
+  nr_lim = n - r
+  
+  res = 1
+  
+  rc = r + 1
+  nrc = 1
+  print('rc=', rc, 'n=', n, 'total', n-rc)
+  while rc <= n:
+    res *= rc
+    print(rc)
+    while res%nrc == 0 and nrc <= nr_lim:
+      #print('nrc=', nrc, 'res=', res)
+      res //= nrc
+      nrc +=1
+    
+    if nrc > nr_lim:
+      res %= mod
+      
+    rc += 1
+  
+  return res % mod
+
+
+MEM = {}
+
+def binom_mem(r, n, mod):
+  key = (r,n, mod)
+  if MEM.get(key):
+    return MEM[key]
+  r = binom_mod(r,n,mod)
+  MEM[key] = r
+  return r
+
+
+binom = lambda r,n: binom_mem(r,n,1000007)
+
+def sumz(arr, N, mod=1000007):
   coeff = [0 for a in arr]
   
   for i in range(0, len(coeff)):
+    print('ai', i, 'of', len(coeff))
     m = len(arr)
     cf = 0
     n = 0
-    while n*m+i <= N:
-      cf += int(binom(n*m + i, N))
+    s = 0
+    if N > mod:
+      s = N - mod + 1
+    while s + n*m+i <= N:
+      print('cf', cf, 'from', s + n*m + i, 'to', N)
+      cf += int(binom(s + n*m + i, N))
       n += 1
     coeff[i] = cf
   
@@ -23,7 +84,7 @@ def sumz(arr, N):
     s = 0
     for j in range(0, len(arr)):
       s += coeff[j]*(arr[j])
-    res.append(int(s)%1000007)
+    res.append(int(s)%mod)
     coeff = [coeff[-1]] + coeff[0:-1]
   
   return res
