@@ -1,4 +1,4 @@
-from math import ceil, factorial as fac
+from math import ceil, factorial as fac, log
 
 def binom(r, n):
   if r == 0:
@@ -35,15 +35,20 @@ def binom_mod(r, n, mod):
   print('rc=', rc, 'n=', n, 'total', n-rc)
   while rc <= n:
     res *= rc
-    print(rc)
+    if rc%1000 == 0:
+      print(rc, 'res digits = ',int(log(res)))
+      if nrc > nr_lim:
+        print(' moding')
     while res%nrc == 0 and nrc <= nr_lim:
       #print('nrc=', nrc, 'res=', res)
       res //= nrc
       nrc +=1
+      #print(nrc, 'of', nr_lim)
     
     if nrc > nr_lim:
       res %= mod
-      
+    if res == 0:
+      return 0
     rc += 1
   
   return res % mod
@@ -72,7 +77,7 @@ def sumz(arr, N, mod=1000007):
     n = 0
     s = 0
     if N > mod:
-      s = N - mod + 1
+      s = N - (N%mod)
     while s + n*m+i <= N:
       print('cf', cf, 'from', s + n*m + i, 'to', N)
       cf += int(binom(s + n*m + i, N))
